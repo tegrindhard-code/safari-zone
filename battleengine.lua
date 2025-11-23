@@ -768,9 +768,9 @@ Battle = class({
 		self.p1.foe = self.p2
 		self.p2.foe = self.p1
 
-		-- Safari Zone specific: player has no active Pokemon, wild is already on field
+		-- Safari Zone specific: player has no active Pokemon
 		self.p1.active = {}
-		self.p2.active = {self.wildFoePokemon}
+		-- Note: p2.active will be set by BattleSide:start() which calls switchIn()
 
 		-- NOW start the battle with BOTH sides ready
 		self:start()
@@ -1547,7 +1547,7 @@ function Battle:getRelevantEffectsInner(thing, callbackType, foeCallbackType, fo
 				self:resolveLastPriority(statuses, callbackType)
 			end
 		end
-		if foeCallbackType then
+		if foeCallbackType and type(foeCallbackType) == 'string' then
 			self:getRelevantEffectsInner(thing.foe, foeCallbackType, nil, nil, false, false, getAll, statuses)
 			if string.sub(foeCallbackType, 1, 5) == 'onFoe' then
 				local eventName = string.sub(foeCallbackType, 6)
@@ -1601,9 +1601,9 @@ function Battle:getRelevantEffectsInner(thing, callbackType, foeCallbackType, fo
 		self:resolveLastPriority(statuses, callbackType)
 	end
 
-	if foeThing and foeCallbackType and foeCallbackType:sub(1, 8) ~= 'onSource' then
+	if foeThing and foeCallbackType and type(foeCallbackType) == 'string' and foeCallbackType:sub(1, 8) ~= 'onSource' then
 		self:getRelevantEffectsInner(foeThing, foeCallbackType, nil, nil, false, false, getAll, statuses)
-	elseif foeCallbackType then
+	elseif foeCallbackType and type(foeCallbackType) == 'string' then
 		local foeActive = thing.side.foe.active
 		local allyActive = thing.side.active
 		local eventName = ''
@@ -2762,7 +2762,7 @@ function Battle:getDamage(pokemon, target, move, suppressMessages)
 	basePower = self:runEvent('BasePower', pokemon, target, move, basePower, true)
 
 	if Not(basePower) then return 0 end
-	basePower = math.max(basePower, 1)
+	basePower = math.max(tonumber(basePower) or 0, 1)
 
 	local level = pokemon.level
 
@@ -2886,11 +2886,11 @@ function Battle:getDamage(pokemon, target, move, suppressMessages)
 	-- Final modifier
 	baseDamage = self:runEvent('ModifyDamage', pokemon, target, move, baseDamage)
 
-	if basePower > 0 and math.floor(baseDamage) == 0 then
+	if basePower > 0 and math.floor(tonumber(baseDamage) or 0) == 0 then
 		return 1
 	end
 
-	return math.floor(baseDamage)
+	return math.floor(tonumber(baseDamage) or 0)
 end
 function Battle:randomizer(baseDamage)
 	return math.floor(baseDamage * (100 - math.random(0, 15)) / 100)
@@ -3759,7 +3759,7 @@ function Battle:parseChoice(player, choices, side)
 
 			local data = ''
 			local firstSpaceIndex = indexOf(choice, ' ')
-			if firstSpaceIndex then
+			if firstSpaceIndex and type(choice) == 'string' then
 				data = trim(string.sub(choice, firstSpaceIndex+1))
 				choice = trim(string.sub(choice, 1, firstSpaceIndex-1))
 			end
@@ -4238,7 +4238,7 @@ function Battle:join2v2(player, teamOrder)--::join2v2
 		for i = 1, #teamOrder do
 			local v = teamOrder[i]
 			if type(v) == 'number' then
-				v = math.floor(v)
+				v = math.floor(tonumber(v) or 0)
 				-- ignore repeats
 				if not already[v] then
 					already[v] = true

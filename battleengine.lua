@@ -2408,7 +2408,8 @@ function Battle:start()
 		end
 	end
 
-	if not self.p1.pokemon[1] or not self.p2.pokemon[1] then
+	-- Check for empty teams (except Safari Zone where p1 has no Pokemon)
+	if not self.isSafari and (not self.p1.pokemon[1] or not self.p2.pokemon[1]) then
 		self:debugError('battle error: one team is empty')
 		return
 	end
@@ -3018,15 +3019,22 @@ function Battle:faintMessages(lastFirst)
 		end
 	end
 	self:awardQueuedExp()
-	if self.p1.pokemonLeft <= 0 and self.p2.pokemonLeft <= 0 then
-		self:win(faintData and faintData.target.side)
-		return true
-	end
-	if self.p1.pokemonLeft <= 0 then
-		self:win(self.p2)
-		return true
-	end
-	if self.p2.pokemonLeft <= 0 then
+	-- Safari Zone uses different win conditions (ball count, not Pokemon count)
+	if not self.isSafari then
+		if self.p1.pokemonLeft <= 0 and self.p2.pokemonLeft <= 0 then
+			self:win(faintData and faintData.target.side)
+			return true
+		end
+		if self.p1.pokemonLeft <= 0 then
+			self:win(self.p2)
+			return true
+		end
+		if self.p2.pokemonLeft <= 0 then
+			self:win(self.p1)
+			return true
+		end
+	elseif self.p2.pokemonLeft <= 0 then
+		-- Safari Zone: If wild Pokemon faints, player wins
 		self:win(self.p1)
 		return true
 	end

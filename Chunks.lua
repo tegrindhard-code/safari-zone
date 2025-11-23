@@ -1904,10 +1904,7 @@ local chunks = {
 		blackOutTo = 'chunk58',
 		buildings = {
 			'Gate24',
-			['C_chunk89|a'] = {
-				DoorViewAngle = 10
-			},
-			['C_chunk89|b'] = {
+			['C_chunk89'] = {
 				DoorViewAngle = 10
 			}
 		},
@@ -2318,16 +2315,10 @@ local chunks = {
 		noHover = true,
 		canFly = false,
 		buildings = {
-			['C_chunk61|a'] = {
+			['C_chunk61'] = {
 				DoorViewAngle = 10
 			},
-			['C_chunk61|b'] = {
-				DoorViewAngle = 10
-			},
-			['C_chunk90|a'] = {
-				DoorViewAngle = 10
-			},
-			['C_chunk90|b'] = {
+			['C_chunk90'] = {
 				DoorViewAngle = 10
 			}
 		},
@@ -2343,10 +2334,7 @@ local chunks = {
 	['chunk90'] = {
 		blackOutTo = 'chunk58',
 		buildings = {
-			['C_chunk89|a'] = {
-				DoorViewAngle = 10
-			},
-			['C_chunk89|b'] = {
+			['C_chunk89'] = {
 				DoorViewAngle = 10
 			}
 		},

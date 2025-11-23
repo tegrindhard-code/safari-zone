@@ -768,9 +768,9 @@ Battle = class({
 		self.p1.foe = self.p2
 		self.p2.foe = self.p1
 
-		-- Safari Zone specific: player has no active Pokemon, wild is already on field
+		-- Safari Zone specific: player has no active Pokemon
 		self.p1.active = {}
-		self.p2.active = {self.wildFoePokemon}
+		-- Note: p2.active will be set by BattleSide:start() which calls switchIn()
 
 		-- NOW start the battle with BOTH sides ready
 		self:start()

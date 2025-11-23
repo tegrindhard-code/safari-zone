@@ -17809,14 +17809,7 @@ return function(_p)--local _p = require(script.Parent)
 
 						-- Force exit if steps ran out
 						if stepsRanOut then
-							if stepConnection then
-								stepConnection:Disconnect()
-								stepConnection = nil
-							end
-							if safariStepGui then
-								safariStepGui:Destroy()
-								safariStepGui = nil
-							end
+							_p.DataManager:cleanupSafariZone()
 
 							chat:say('PA Announcer', 'You\'ve run out of steps!', 'Please exit the Safari Zone.')
 
@@ -17855,18 +17848,9 @@ return function(_p)--local _p = require(script.Parent)
 					TextStrokeTransparency = 0.5,
 					ZIndex = 10,
 				}
-			end
 
-			-- Store cleanup function for exit
-			chunk.safariCleanup = function()
-				if stepConnection then
-					stepConnection:Disconnect()
-					stepConnection = nil
-				end
-				if safariStepGui then
-					safariStepGui:Destroy()
-					safariStepGui = nil
-				end
+				-- Store in DataManager for cleanup on exit
+				_p.DataManager:startSafariStepTracking(stepConnection, safariStepGui)
 			end
 
 			touchEvent(nil, SafariTrigger, false, function()
@@ -17927,10 +17911,7 @@ return function(_p)--local _p = require(script.Parent)
 			_p.Network:get('PDS', 'removeSafariBalls')
 
 			-- Clean up step tracking
-			local chunk89 = _p.DataManager:getChunkById('chunk89')
-			if chunk89 and chunk89.safariCleanup then
-				chunk89.safariCleanup()
-			end
+			_p.DataManager:cleanupSafariZone()
 		end,
 		onExitC_chunk83 = function()
 			local chunk = _p.DataManager.currentChunk

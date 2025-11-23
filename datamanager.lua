@@ -738,4 +738,22 @@ end
 	end
 
 
+	-- SAFARI ZONE
+	function DataManager:startSafariStepTracking(stepConnection, stepGui)
+		self.safariStepConnection = stepConnection
+		self.safariStepGui = stepGui
+	end
+
+	function DataManager:cleanupSafariZone()
+		if self.safariStepConnection then
+			self.safariStepConnection:Disconnect()
+			self.safariStepConnection = nil
+		end
+		if self.safariStepGui then
+			self.safariStepGui:Destroy()
+			self.safariStepGui = nil
+		end
+	end
+
+
 	return DataManager end

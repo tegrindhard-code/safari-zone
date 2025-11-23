@@ -1990,7 +1990,21 @@ end
 			-- Safari Zone special handling: nActive = 0 (no active player Pokemon)
 			if self.isSafari and nActive == 0 then
 				battleGui.fighterIcon = _p.Menu.bag:getItemIcon(5)
-				Utilities.fastSpawn(battleGui.mainChoices, battleGui, {moves = {}}, 1, 1, false, true, {}, false, false, false, false)
+				battleGui.moves = {}
+				-- Create dummy Pokemon object with required properties for Safari Zone
+				local dummyPokemon = {
+					moves = {},
+					canZMove = false,
+					canMegaEvo = false,
+					canUltraBurst = false,
+					canDynamax = false,
+					canGigantamax = false,
+					currentDyna = false,
+					maxMoves = {},
+					hpType = nil,
+					trapped = false
+				}
+				Utilities.fastSpawn(battleGui.mainChoices, battleGui, dummyPokemon, 1, 1, false, true, {}, false, false, false, false)
 				local choice = self.InputChosen:wait()
 				choices[1] = choice
 				spawn(function() battleGui:toggleRemainingPartyGuis(false) end)
@@ -2204,7 +2218,21 @@ end
 			-- Safari Zone request handler
 			wait(.25)
 			battleGui.fighterIcon = _p.Menu.bag:getItemIcon(5)
-			Utilities.fastSpawn(battleGui.mainChoices, battleGui, {moves = {}}, 1, 1, false, true, {}, false, false, false, false)
+			battleGui.moves = {}
+			-- Create dummy Pokemon object with required properties for Safari Zone
+			local dummyPokemon = {
+				moves = {},
+				canZMove = false,
+				canMegaEvo = false,
+				canUltraBurst = false,
+				canDynamax = false,
+				canGigantamax = false,
+				currentDyna = false,
+				maxMoves = {},
+				hpType = nil,
+				trapped = false
+			}
+			Utilities.fastSpawn(battleGui.mainChoices, battleGui, dummyPokemon, 1, 1, false, true, {}, false, false, false, false)
 			local choice = self.InputChosen:wait()
 			local choices = {choice}
 			spawn(function() battleGui:toggleRemainingPartyGuis(false) end)

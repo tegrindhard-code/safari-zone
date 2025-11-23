@@ -145,6 +145,8 @@ local publicFns = {
 	buySushi              = true,
 	BuySafariBalls        = true,
 	removeSafariBalls     = true,
+	decrementSafariStep   = true,
+	getSafariStepsRemaining = true,
 	getGreenhouseState    = true,
 	giveEkans             = true,
 	birdsitem             = true,
@@ -4203,7 +4205,9 @@ function PlayerData:BuySafariBalls()
 	if not self:addMoney(-5000) then return 'nm' end
 
 	local item = _f.Database.ItemById['safariball']
-	self:addBagItems({num = item.num, quantity = 20})
+	-- Standard Safari Zone: 30 Safari Balls, 500 steps
+	self:addBagItems({num = item.num, quantity = 30})
+	self.safariStepsRemaining = 500
 	return item.name
 end
 
@@ -4211,8 +4215,27 @@ function PlayerData:removeSafariBalls()
 	if not self:getBagDataById('safariball', 1) then return end
 
 	local item = _f.Database.ItemById['safariball']
-	self:incrementBagItem({num = item.num, quantity = -20})
+	local currentQuantity = self:getBagDataById('safariball', 1).quantity or 0
+	self:incrementBagItem({num = item.num, quantity = -currentQuantity})
+	self.safariStepsRemaining = nil
 	return item.name
+end
+
+function PlayerData:decrementSafariStep()
+	if not self.safariStepsRemaining then return false end
+	if self.safariStepsRemaining <= 0 then return false end
+
+	self.safariStepsRemaining = self.safariStepsRemaining - 1
+
+	if self.safariStepsRemaining <= 0 then
+		return true -- Signal that steps ran out
+	end
+
+	return false
+end
+
+function PlayerData:getSafariStepsRemaining()
+	return self.safariStepsRemaining or 0
 end
 
 function PlayerData:buySushi()

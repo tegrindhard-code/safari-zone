@@ -17778,6 +17778,81 @@ return function(_p)--local _p = require(script.Parent)
 			local wkb = chunk.map.WTriggerB.Position
 			local wkt = chunk.map.WTriggerT.Position
 
+			-- Safari Zone step tracking
+			local lastPosition = nil
+			local stepConnection = nil
+			local safariStepGui = nil
+
+			local function startStepTracking()
+				if stepConnection then return end
+
+				lastPosition = _p.player.Character.HumanoidRootPart.Position
+				local STEP_DISTANCE = 4 -- Approximate distance per step in studs
+
+				stepConnection = heartbeat:Connect(function()
+					if not _p.player.Character or not _p.player.Character:FindFirstChild("HumanoidRootPart") then return end
+
+					local currentPosition = _p.player.Character.HumanoidRootPart.Position
+					local distance = (currentPosition - lastPosition).Magnitude
+
+					if distance >= STEP_DISTANCE then
+						lastPosition = currentPosition
+
+						-- Decrement step on server
+						local stepsRanOut = _p.Network:get('PDS', 'decrementSafariStep')
+
+						-- Update step counter UI
+						if safariStepGui and safariStepGui:FindFirstChild("StepText") then
+							local stepsRemaining = _p.Network:get('PDS', 'getSafariStepsRemaining')
+							safariStepGui.StepText.Text = "Steps: " .. stepsRemaining
+						end
+
+						-- Force exit if steps ran out
+						if stepsRanOut then
+							_p.DataManager:cleanupSafariZone()
+
+							chat:say('PA Announcer', 'You\'ve run out of steps!', 'Please exit the Safari Zone.')
+
+							-- Remove Safari Balls and force player to leave
+							_p.Network:get('PDS', 'removeSafariBalls')
+
+							-- Teleport player to exit
+							delay(2, function()
+								if _p.player.Character and _p.player.Character:FindFirstChild("HumanoidRootPart") then
+									_p.player.Character.HumanoidRootPart.CFrame = CFrame.new(wkb)
+								end
+							end)
+						end
+					end
+				end)
+
+				-- Create step counter UI
+				safariStepGui = create 'ScreenGui' {
+					Name = 'SafariStepCounter',
+					Parent = _p.player.PlayerGui,
+					ResetOnSpawn = false,
+				}
+
+				create 'TextLabel' {
+					Name = 'StepText',
+					Parent = safariStepGui,
+					BackgroundColor3 = Color3.new(0, 0, 0),
+					BackgroundTransparency = 0.5,
+					BorderSizePixel = 0,
+					Position = UDim2.new(0.5, -100, 0, 10),
+					Size = UDim2.new(0, 200, 0, 40),
+					Font = Enum.Font.GothamBold,
+					Text = "Steps: 500",
+					TextColor3 = Color3.new(1, 1, 1),
+					TextScaled = true,
+					TextStrokeTransparency = 0.5,
+					ZIndex = 10,
+				}
+
+				-- Store in DataManager for cleanup on exit
+				_p.DataManager:startSafariStepTracking(stepConnection, safariStepGui)
+			end
+
 			touchEvent(nil, SafariTrigger, false, function()
 				local cam = workspace.CurrentCamera
 				spawn(function()
@@ -17813,12 +17888,13 @@ return function(_p)--local _p = require(script.Parent)
 					Parent = Utilities.gui,
 				}
 				Utilities.Write('[$]' .. _p.PlayerData:formatMoney()) {Frame = moneyFrame, Scaled = true, TextXAlignment = Enum.TextXAlignment.Left}
-				salesperson:Say('For [$]500, you can have twenty Safari Balls to use to try and capture wild pokemon.')
+				salesperson:Say('For [$]5,000, you can have thirty Safari Balls and 500 steps to try and capture wild pokemon.')
 				local choice = salesperson:Say('[y/n]Are you interested?')
 				if choice then
 					moneyFrame:Destroy()
-					salesperson:Say('Here are your Safari Balls. Have fun!')
-					_p.PlayerData.money = _p.PlayerData.money - 500
+					salesperson:Say('Here are your Safari Balls. Have fun!', 'You have 500 steps!')
+					_p.PlayerData.money = _p.PlayerData.money - 5000
+					startStepTracking()
 					spawn(function() MasterControl:WalkTo(wkt) end)
 				else
 					moneyFrame:Destroy()
@@ -17831,7 +17907,11 @@ return function(_p)--local _p = require(script.Parent)
 			end)
 		end,
 		onExit_chunk90 = function(chunk)
+			-- Clean up Safari Zone
 			_p.Network:get('PDS', 'removeSafariBalls')
+
+			-- Clean up step tracking
+			_p.DataManager:cleanupSafariZone()
 		end,
 		onExitC_chunk83 = function()
 			local chunk = _p.DataManager.currentChunk

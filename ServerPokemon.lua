@@ -193,9 +193,13 @@ Pokemon = Utilities.class({
 		self.nature = (math.random(25)+math.floor(tick()*100))%25 + 1
 	end
 
+	-- Tera Type initialization
 	if not self.teraType then
 		local types = {'Bug','Dark','Dragon','Electric','Fairy','Fighting','Fire','Flying','Ghost','Grass','Ground','Ice','Normal','Poison','Psychic','Rock','Steel','Water'}
-		self.teraType = types[math.random(#types)]
+		-- Use personality as seed for deterministic type generation (for Pokemon saved before version 7)
+		-- This ensures old Pokemon get consistent Tera types across rejoins
+		local typeIndex = (self.personality % #types) + 1
+		self.teraType = types[typeIndex]
 	end
 
 	self:calculateStats() -- OVH  is this even necessary any more? -> IT'S NEEDED FOR .hp / .maxhp; perhaps should remove other stats from fn

@@ -2049,15 +2049,19 @@ function Battle:switchIn(pokemon, pos)
 	self:runEvent('BeforeSwitchIn', pokemon)
 	if side.active[pos] ~= null then
 		local oldActive = side.active[pos]
-		oldActive.isActive = false
-		oldActive.isStarted = false
-		oldActive.usedItemThisTurn = false
-		oldActive.position = pokemon.position
-		pokemon.position = pos
-		side.pokemon[pokemon.position] = pokemon
-		side.pokemon[oldActive.position] = oldActive
-		self:cancelMove(oldActive)
-		oldActive:clearVolatile()
+		if oldActive and oldActive.clearVolatile then
+			oldActive.isActive = false
+			oldActive.isStarted = false
+			oldActive.usedItemThisTurn = false
+			oldActive.position = pokemon.position
+			pokemon.position = pos
+			side.pokemon[pokemon.position] = pokemon
+			side.pokemon[oldActive.position] = oldActive
+			self:cancelMove(oldActive)
+			oldActive:clearVolatile()
+		else
+			pokemon.position = pos
+		end
 	else
 		pokemon.position = pos
 	end
@@ -2117,7 +2121,9 @@ function Battle:dragIn(side, pos)--::dragIn
 				end
 			end
 		end
-		oldActive:clearVolatile()
+		if oldActive.clearVolatile then
+			oldActive:clearVolatile()
+		end
 	else
 		side.pokemon[pos] = pokemon
 	end

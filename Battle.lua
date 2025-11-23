@@ -1986,6 +1986,21 @@ end
 			local first = true
 			local firstValid
 			local rewind = false
+
+			-- Safari Zone special handling: nActive = 0 (no active player Pokemon)
+			if self.isSafari and nActive == 0 then
+				battleGui.fighterIcon = _p.Menu.bag:getItemIcon(5)
+				Utilities.fastSpawn(battleGui.mainChoices, battleGui, {moves = {}}, 1, 1, false, true, {}, false, false, false, false)
+				local choice = self.InputChosen:wait()
+				choices[1] = choice
+				spawn(function() battleGui:toggleRemainingPartyGuis(false) end)
+				spawn(function() battleGui:toggleFC(false) end)
+				self:send('choose', self.sideId, choices, request.rqid)
+				task.wait(.7)
+				self:setIdle()
+				return
+			end
+
 			while i <= nActive do
 				local a = request.active[i]
 				if a and not a.fainted then
@@ -2185,8 +2200,18 @@ end
 				self:send('choose', self.sideId, choices, request.rqid)
 			end
 			self:setIdle()
-			--	elseif request.requestType == 'team' then
-			--		
+		elseif request.requestType == 'safari' then
+			-- Safari Zone request handler
+			wait(.25)
+			battleGui.fighterIcon = _p.Menu.bag:getItemIcon(5)
+			Utilities.fastSpawn(battleGui.mainChoices, battleGui, {moves = {}}, 1, 1, false, true, {}, false, false, false, false)
+			local choice = self.InputChosen:wait()
+			local choices = {choice}
+			spawn(function() battleGui:toggleRemainingPartyGuis(false) end)
+			spawn(function() battleGui:toggleFC(false) end)
+			self:send('choose', self.sideId, choices, request.rqid)
+			task.wait(.7)
+			self:setIdle()
 		elseif request.requestType == 'wait' then
 			if self.kind == 'pvp' or self.kind == '2v2' then
 				self:setIdle()

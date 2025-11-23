@@ -1097,6 +1097,9 @@ return function(Battle)
 
 	-- Terastallization System
 	function Battle:canTerastallize(pokemon)
+		-- Nil check
+		if not pokemon then return false end
+
 		-- Cannot terastallize if already terastallized
 		if pokemon.isTerastallized then return false end
 
@@ -1138,6 +1141,9 @@ return function(Battle)
 	end
 
 	function Battle:hasTeraSTAB(pokemon, moveType)
+		-- Handle nil pokemon or missing moveType
+		if not pokemon or not moveType then return false end
+
 		-- If not terastallized, use normal STAB
 		if not pokemon.isTerastallized then
 			return pokemon:hasType(moveType)

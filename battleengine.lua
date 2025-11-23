@@ -748,23 +748,10 @@ Battle = class({
 
 		self.wildFoePokemon = pokemon
 
-		-- Safari Zone: Player doesn't battle with their team, just throws balls
-		-- Create p2 (wild Pokemon) with join method
+		-- Safari Zone: Only create the wild Pokemon side, no player side needed
 		self:join(nil, 2, '#Wild', {pokemon:getBattleData()})
 
-		-- Create p1 (player) manually with empty team since Safari Zone doesn't use player's Pokemon
-		self.p1 = BattleSide:new(nil, PlayerData.trainerName, self, 1, {}, nil)
-		self.sides[1] = self.p1
-		self.p1.isActive = true
-		self.p1.player = creatingPlayer
-		self:add('player', 'p1', self.p1.name)
-
-		-- Set up foe relationships
-		self.p1.foe = self.p2
-		self.p2.foe = self.p1
-
-		-- Safari Zone specific: player has no active Pokemon, wild is already active
-		self.p1.active = {}
+		-- Set wild Pokemon as already active
 		self.p2.active = {self.wildFoePokemon}
 	else
 		error('unknown battle structure')

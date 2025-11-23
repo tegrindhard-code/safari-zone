@@ -748,15 +748,9 @@ Battle = class({
 
 		self.wildFoePokemon = pokemon
 
-		self.p2 = BattleSide:new(nil, '#Wild', self, 2, {pokemon:getBattleData()}, nil)
-		self.p1 = BattleSide:new(creatingPlayer, PlayerData.trainerName, self, 1, {}, PlayerData)
-
-		self.sides = {self.p1, self.p2}
-		self.p1.foe = self.p2
-		self.p2.foe = self.p1
-
-		self.p1.active = {}  -- Player has no active Pokemon
-		self.p2.active = {self.wildFoePokemon}
+		-- Use join method like other battle types to properly initialize battle sides
+		self:join(nil, 2, '#Wild', {pokemon:getBattleData()})
+		self:join(creatingPlayer, 1, PlayerData.trainerName, nil)
 	else
 		error('unknown battle structure')
 	end

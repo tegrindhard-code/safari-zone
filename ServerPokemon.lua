@@ -193,6 +193,11 @@ Pokemon = Utilities.class({
 		self.nature = (math.random(25)+math.floor(tick()*100))%25 + 1
 	end
 
+	if not self.teraType then
+		local types = {'Bug','Dark','Dragon','Electric','Fairy','Fighting','Fire','Flying','Ghost','Grass','Ground','Ice','Normal','Poison','Psychic','Rock','Steel','Water'}
+		self.teraType = types[math.random(#types)]
+	end
+
 	self:calculateStats() -- OVH  is this even necessary any more? -> IT'S NEEDED FOR .hp / .maxhp; perhaps should remove other stats from fn
 
 	if self.moves then
@@ -1112,6 +1117,7 @@ function Pokemon:getBattleData(ignoreHPState)
 	set.happiness = self.happiness or 0
 	set.shiny = self.shiny
 	set.stamps = self.stamps
+	set.teraType = self.teraType
 	set.item = self:getHeldItem().id
 	set.ability = self:getAbilityConfig()
 	--	set.types = self:getTypes()
@@ -1677,7 +1683,7 @@ end
 
 function Pokemon:serialize(inPC)
 	local buffer = BitBuffer.Create()
-	local version = 6
+	local version = 7
 	buffer:WriteUnsigned(6, version)
 	buffer:WriteBool(inPC and true or false)
 	buffer:WriteUnsigned(11, self.data.num)
@@ -1711,6 +1717,20 @@ function Pokemon:serialize(inPC)
 
 	local nature = self:validateForBitWidth(self.nature or math.random(25), 5, "nature")
 	buffer:WriteUnsigned(5, nature)
+
+	-- Serialize teraType (convert type name to index 1-18)
+	local types = {'Bug','Dark','Dragon','Electric','Fairy','Fighting','Fire','Flying','Ghost','Grass','Ground','Ice','Normal','Poison','Psychic','Rock','Steel','Water'}
+	local teraTypeIndex = 1 -- Default to Bug
+	if self.teraType then
+		for i, typeName in ipairs(types) do
+			if typeName == self.teraType then
+				teraTypeIndex = i
+				break
+			end
+		end
+	end
+	teraTypeIndex = self:validateForBitWidth(teraTypeIndex, 5, "teraType")
+	buffer:WriteUnsigned(5, teraTypeIndex)
 
 	local happiness = self:validateForBitWidth(self.happiness or 0, 8, "happiness")
 	buffer:WriteUnsigned(8, happiness)
@@ -1856,6 +1876,12 @@ function Pokemon:deserialize(str, PlayerData)
 		self.experience = buffer:ReadUnsigned(21)
 		self.personality = buffer:ReadUnsigned(32)
 		self.nature = buffer:ReadUnsigned(5)
+		if version >= 7 then
+			-- Deserialize teraType (convert index back to type name)
+			local teraTypeIndex = buffer:ReadUnsigned(5)
+			local types = {'Bug','Dark','Dragon','Electric','Fairy','Fighting','Fire','Flying','Ghost','Grass','Ground','Ice','Normal','Poison','Psychic','Rock','Steel','Water'}
+			self.teraType = types[teraTypeIndex] or 'Normal'
+		end
 		self.happiness = buffer:ReadUnsigned(8)
 		if version >= 1 then
 			if buffer:ReadBool() then

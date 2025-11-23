@@ -5089,49 +5089,34 @@ end
 --// Codes
 local codes = {
 	{
-		["Name"] = "BugFixes",
-		['Date'] = 1755700136,
+		["Name"] = "PALDEAN2025",
+		['Date'] = 1764649271, 
 		['Limit'] = false,
 		["Function"] = function(self)
-				self:addBagItems{id = 'masterball', quantity = 5}
-				self:addBagItems{id = 'rarecandy', quantity = 15}
-				self:addMoney(75000)
+			self:addBagItems{id = 'pokeball', quantity = 20}
+			self:addBagItems{id = 'greatball', quantity = 10}
+			self:addBagItems{id = 'potion', quantity = 15}
+			self:addBagItems{id = 'superpotion', quantity = 8}
+			self:addBagItems{id = 'rarecandy', quantity = 5}
+			self:addMoney(30000)
 
-				local list = {
-					"Bulbasaur", "Charmander", "Squirtle", "Chikorita", "Cyndaquil", "Totodile", "Treecko", "Torchic", "Mudkip", "Turtwig", "Chimchar", "Piplup", "Snivy", "Tepig", "Oshawott", "Chespin", "Fennekin", "Froakie", "Rowlet", "Litten", "Popplio", "Grookey", "Scorbunny", "Sobble", "Sprigatito", "Fuecoco", "Quaxly"
-				}
-				local rand = math.random(#list)
-				self:PC_sendToStore(self:newPokemon({
-					name = "Pikachu",
-					level = 10,
-					shiny = true,
-					untradable = true,
-					ot = 17
-				}))
-				return "Code Successfully Redeemed!"
+			return "Code Successfully Redeemed!"
 		end
 	},
 	{
-		["Name"] = "ThanksForPlaying!",
-		['Date'] = 1755700136,
+		["Name"] = "GEN9EXPLORER",
+		['Date'] = 1764649271,
 		['Limit'] = false,
 		["Function"] = function(self)
-			if self.badges[2] then
-				self:addBagItems{id = 'greatball', quantity = 20}
-				self:addBagItems{id = 'superpotion', quantity = 12}
-				self:addBagItems{id = 'revive', quantity = 8}
+			if self.badges[3] then
+				self:addBagItems{id = 'ultraball', quantity = 20}
+				self:addBagItems{id = 'hyperpotion', quantity = 12}
+				self:addBagItems{id = 'revive', quantity = 10}
+				self:addBagItems{id = 'fullheal', quantity = 8}
 				self:addBagItems{id = 'rarecandy', quantity = 5}
 
-				self:addMoney(35000)
-				self:addBP(50)
-
-				self:PC_sendToStore(self:newPokemon({
-					name = "Azumarill",
-					level = 20,
-					shiny = false,
-					untradable = true,
-					ot = 17
-				}))
+				self:addMoney(60000)
+				self:addBP(100)
 
 				return "Code Successfully Redeemed!"
 			else

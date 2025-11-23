@@ -1094,4 +1094,75 @@ return function(Battle)
 			end
 		end
 	end
+
+	-- Terastallization System
+	function Battle:canTerastallize(pokemon)
+		-- Cannot terastallize if already terastallized
+		if pokemon.isTerastallized then return false end
+
+		-- Cannot terastallize if fainted
+		if pokemon.fainted then return false end
+
+		-- Must have a Tera Type
+		if not pokemon.teraType then return false end
+
+		-- Check if another Pokemon on the same team has already terastallized
+		for _, ally in pairs(pokemon.side.pokemon) do
+			if ally.isTerastallized and ally.teamn == pokemon.teamn then
+				return false
+			end
+		end
+
+		return true
+	end
+
+	function Battle:runTerastallize(pokemon)
+		if not pokemon.canTerastallize then return false end
+
+		-- Store original types for STAB calculation
+		pokemon.originalTypes = {}
+		for _, t in pairs(pokemon:getTypes()) do
+			table.insert(pokemon.originalTypes, t)
+		end
+
+		-- Change to Tera Type (mono-type)
+		pokemon:setType(pokemon.teraType)
+		pokemon.isTerastallized = true
+		pokemon.canTerastallize = false
+
+		-- Update details
+		self:add('-terastallize', pokemon, pokemon.teraType)
+		self:add('-message', pokemon.name .. ' has Terastallized into the ' .. pokemon.teraType .. ' type!')
+
+		-- Prevent other Pokemon on the same team from terastallizing
+		for _, ally in pairs(pokemon.side.pokemon) do
+			if ally.canTerastallize and ally ~= pokemon and ally.teamn == pokemon.teamn then
+				ally.canTerastallize = false
+			end
+		end
+
+		return true
+	end
+
+	function Battle:hasTeraSTAB(pokemon, moveType)
+		-- If not terastallized, use normal STAB
+		if not pokemon.isTerastallized then
+			return pokemon:hasType(moveType)
+		end
+
+		-- When terastallized, gets STAB on Tera Type AND original types
+		if pokemon.teraType == moveType then
+			return true
+		end
+
+		if pokemon.originalTypes then
+			for _, t in pairs(pokemon.originalTypes) do
+				if t == moveType then
+					return true
+				end
+			end
+		end
+
+		return false
+	end
 end

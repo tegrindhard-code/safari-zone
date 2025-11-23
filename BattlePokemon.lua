@@ -197,6 +197,12 @@ BattlePokemon = class({
 	self.canMegaEvo = self.battle:canMegaEvo(self)
 	self.canZMove = self.battle:canZMove(self)
 
+	-- Terastallization
+	self.teraType = set.teraType or self.types[1] -- Default to first type if not specified
+	self.canTerastallize = self.battle:canTerastallize and self.battle:canTerastallize(self) or false
+	self.isTerastallized = false
+	self.originalTypes = nil -- Will store original types when terastallized
+
 	self.evs = {}
 	self.ivs = {}
 	if not set.evs then
@@ -618,7 +624,11 @@ function BattlePokemon:getRequestData() -- for pokemon in request.active (for re
 	data.fainted = self.fainted
 	if self.teamn then data.teamn = self.teamn end
 	if self.canMegaEvo then data.canMegaEvo = true end
-	if self.canZMove then data.canZMove = self.canZMove end 
+	if self.canZMove then data.canZMove = self.canZMove end
+	if self.canTerastallize then
+		data.canTerastallize = true
+		data.teraType = self.teraType
+	end
 	if isLastActive then
 		if self.maybeDisabled then
 			data.maybeDisabled = true

@@ -896,7 +896,7 @@ return function(_p)
 
 	function BattleClient:blackedOut(wild, moneyLost)
 		local currentCamera = workspace.CurrentCamera
-		if self.currentBattle.sides[2].pokemon[1].statbar then
+		if self.currentBattle.sides[2].pokemon[1] and self.currentBattle.sides[2].pokemon[1].statbar then
 			self.currentBattle.sides[2].pokemon[1].statbar:slideOffscreen() -- foeHealthGui bug fix
 		end 
 		MasterControl:SetJumpEnabled(false) -- gym 2
@@ -2021,7 +2021,11 @@ end
 							battleGui.moves = a.moves
 							battleGui.hpType = a.hpType
 							pcall(function()
-								battleGui.fighterIcon = self.isSafari and _p.Menu.bag:getItemIcon(5) or self.mySide.active[i]:getIcon()
+								if self.isSafari then
+									battleGui.fighterIcon = _p.Menu.bag:getItemIcon(5)
+								elseif self.mySide.active[i] and self.mySide.active[i] ~= null then
+									battleGui.fighterIcon = self.mySide.active[i]:getIcon()
+								end
 							end)
 							local alreadySwitched = {}
 							local alreadyChoseMega = false
@@ -2902,6 +2906,7 @@ end
 	function BattleClient:takeOver()
 		if self.kind == 'wild' then
 			local foe = self.p2.pokemon[1]
+			if not foe then return end
 
 			if self.isRaid then
 				battleGui:animStatus('maxraid', foe)

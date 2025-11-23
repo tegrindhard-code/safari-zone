@@ -251,7 +251,8 @@ function BattleSide:AIChooseMove(request)
 			local s, r = pcall(function()
 				-- try slot 1 first, fallback for double battle
 				local target = self.foe.active[1] or self.foe.active[2] or self.foe.active[3]
-				
+				if not target or target == null then return end
+
 				-- Manual AI Strategy callback
 				if pokemon.aiStrategy then
 					local chosenName = pokemon.aiStrategy(battle, self, pokemon, target)

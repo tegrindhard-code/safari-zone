@@ -3386,12 +3386,15 @@ function Battle:runSafariBall()
 	local baseCatchRate = pokemon.template.captureRate or 45
 	local catchRate = baseCatchRate
 
+	-- Accurate Pokemon Safari Zone mechanics:
+	-- Eating HALVES catch rate (makes harder to catch)
 	if self.safariData.eatingLevel > 0 then
-		catchRate = math.min(255, catchRate * 2)
+		catchRate = math.max(1, math.floor(catchRate / 2))
 	end
 
+	-- Anger DOUBLES catch rate (makes easier to catch)
 	if self.safariData.angerLevel > 0 then
-		catchRate = math.max(1, math.floor(catchRate / 2))
+		catchRate = math.min(255, catchRate * 2)
 	end
 
 	local maxHP = pokemon:getStat('hp')
@@ -3436,10 +3439,12 @@ end
 function Battle:runSafariBerry()
 	local pokemon = self.wildFoePokemon
 
-	self:add('-message', 'You threw a Berry!')
+	self:add('-message', 'You threw Bait!')
 
-	self.safariData.eatingLevel = math.min(5, self.safariData.eatingLevel + 2)
-	self.safariData.angerLevel = math.max(0, self.safariData.angerLevel - 1)
+	-- Accurate Pokemon Safari Zone mechanics:
+	-- Set eating counter to random 1-5, reset anger counter to 0
+	self.safariData.eatingLevel = math.random(1, 5)
+	self.safariData.angerLevel = 0
 
 	self:add('-message', pokemon.name .. ' is eating!')
 
@@ -3449,10 +3454,12 @@ end
 function Battle:runSafariNear()
 	local pokemon = self.wildFoePokemon
 
-	self:add('-message', 'You went near the Pokemon!')
+	self:add('-message', 'You threw a Rock!')
 
-	self.safariData.angerLevel = math.min(5, self.safariData.angerLevel + 2)
-	self.safariData.eatingLevel = math.max(0, self.safariData.eatingLevel - 1)
+	-- Accurate Pokemon Safari Zone mechanics:
+	-- Set anger counter to random 1-5, reset eating counter to 0
+	self.safariData.angerLevel = math.random(1, 5)
+	self.safariData.eatingLevel = 0
 
 	self:add('-message', pokemon.name .. ' is angry!')
 
@@ -3468,6 +3475,7 @@ end
 function Battle:checkSafariFlee()
 	local pokemon = self.wildFoePokemon
 
+	-- Decrement eating counter each turn
 	if self.safariData.eatingLevel > 0 then
 		self.safariData.eatingLevel = self.safariData.eatingLevel - 1
 		if self.safariData.eatingLevel == 0 then
@@ -3475,28 +3483,32 @@ function Battle:checkSafariFlee()
 		end
 	end
 
-	local fleeChance = 0
+	-- Decrement anger counter each turn
+	if self.safariData.angerLevel > 0 then
+		self.safariData.angerLevel = self.safariData.angerLevel - 1
+	end
 
-	if self.safariData.angerLevel >= 4 then
-		fleeChance = 50
-	elseif self.safariData.angerLevel >= 2 then
-		fleeChance = 25
+	-- Accurate Pokemon Safari Zone flee formula based on Speed stat
+	local speed = pokemon:getStat('spe')
+	local fleeNumerator
+
+	if self.safariData.angerLevel > 0 then
+		-- Angry: min(255, 4*Speed)/256
+		fleeNumerator = math.min(255, 4 * speed)
+	elseif self.safariData.eatingLevel > 0 then
+		-- Eating: floor(Speed/2)/256
+		fleeNumerator = math.floor(speed / 2)
 	else
-		fleeChance = 10
+		-- Neutral: 2*Speed/256
+		fleeNumerator = 2 * speed
 	end
 
-	if self.safariData.eatingLevel > 0 then
-		fleeChance = math.max(5, fleeChance - 20)
-	end
+	local fleeChance = fleeNumerator / 256
 
-	if math.random(100) <= fleeChance then
+	if math.random() < fleeChance then
 		self:add('-message', pokemon.name .. ' ran away!')
 		self:win()
 		return true
-	end
-
-	if self.safariData.angerLevel > 0 then
-		self.safariData.angerLevel = self.safariData.angerLevel - 1
 	end
 
 	return false

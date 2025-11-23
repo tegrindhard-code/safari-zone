@@ -1046,7 +1046,7 @@ end]]
 					if not switched then
 						return self:mainChoices(unpack(args))
 					end
-				elseif name == 'Bag' or name == 'Berry' then
+				elseif name == 'Bag' or name == 'Bait' then
 					if _p.Battle.currentBattle.kind == 'pvp' or _p.Battle.currentBattle.kind == '2v2' or _p.Battle.currentBattle.noBag then
 						self:message('You can\'t use that now.')
 						state = 'canchoosemain'
@@ -1067,7 +1067,7 @@ end]]
 						if name == 'Ball' then
 							spawn(function() self:exitButtonsMain() end)
 							self.inputEvent:fire('useitem safariball')
-						elseif name == 'Go Near' then
+						elseif name == 'Rock' then
 							spawn(function() self:exitButtonsMain() end)
 							self.inputEvent:fire('gonear')
 						end
@@ -1134,25 +1134,25 @@ end]]
 
 		local btnData = {
 			fight = {
-				battle.isSafari and "Ball" or "Fight", 
-				Color3.new(1, .4, .4), 
+				battle.isSafari and "Ball" or "Fight",
+				Color3.new(1, .4, .4),
 				Color3.new(.4, .15, .15)
 			},
 			bag = {
-				battle.isSafari and "Berry" or "Bag",
-				Color3.new(1, .8, .4), 
+				battle.isSafari and "Bait" or "Bag",
+				Color3.new(1, .8, .4),
 				Color3.new(.4, .25, .15),
-			}, 
+			},
 			pokemon = {
-				battle.isSafari and "Go Near" or "Pokemon",
-				Color3.new(.4, 1, .8), 
+				battle.isSafari and "Rock" or "Pokemon",
+				Color3.new(.4, 1, .8),
 				Color3.new(.15, .4, .25)
-			}, 
+			},
 			run = {
 				"Run",
-				Color3.new(.4, .8, 1), 
+				Color3.new(.4, .8, 1),
 				Color3.new(.15, .25, .4)
-			}	
+			}
 		}
 
 		if gui.main then

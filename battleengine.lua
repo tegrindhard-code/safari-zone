@@ -2672,6 +2672,15 @@ function Battle:getDamage(pokemon, target, move, suppressMessages)
 		move.type = pokemon.hpType
 	end
 
+	-- Tera Blast becomes the user's Tera Type when Terastallized
+	if move.id == 'terablast' and pokemon.isTerastallized and pokemon.teraType then
+		move.type = pokemon.teraType
+		-- Tera Blast also becomes Physical if Attack > Sp. Attack when Terastallized
+		if pokemon:getStat('atk') > pokemon:getStat('spa') then
+			move.category = 'Physical'
+		end
+	end
+
 	if not move.ignoreImmunity or (move.ignoreImmunity ~= true and not move.ignoreImmunity[move.type]) then
 		if not target:runImmunity(move.type, not suppressMessages) then
 			return false
@@ -2811,7 +2820,9 @@ function Battle:getDamage(pokemon, target, move, suppressMessages)
 		self:add('-zbroken', target)
 	end
 	-- STAB
-	if move.hasSTAB or (type ~= '???' and pokemon:hasType(type)) then
+	-- Check for Terastallization STAB (gets STAB on both Tera Type and original types when terastallized)
+	local hasSTAB = move.hasSTAB or (type ~= '???' and (self:hasTeraSTAB and self:hasTeraSTAB(pokemon, type) or pokemon:hasType(type)))
+	if hasSTAB then
 		-- The "???" type never gets STAB
 		-- Not even if you Roost in Gen 4 and somehow manage to use
 		-- Struggle in the same turn.
@@ -3036,6 +3047,7 @@ function Battle:resolvePriority(decision)
 				runSwitch = 7.1,
 				switch = 7,
 				megaEvo = 6.9,
+				terastallize = 6.85,
 				residual = -100,
 			}
 			if priorities[decision.choice] then
@@ -3228,6 +3240,8 @@ function Battle:runDecision(decision)
 		self:add()
 	elseif c == 'megaEvo' then
 		if decision.pokemon.canMegaEvo then self:runMegaEvo(decision.pokemon) end
+	elseif c == 'terastallize' then
+		if decision.pokemon.canTerastallize then self:runTerastallize(decision.pokemon) end
 	elseif c == 'beforeTurnMove' then
 		if not decision.pokemon.isActive then return false end
 		if decision.pokemon.fainted then return false end
@@ -3928,7 +3942,8 @@ function Battle:parseChoice(player, choices, side)
 
 				local evoSubs = {
 					choices = {
-						['megaEvo'] = ' mega'
+						['megaEvo'] = ' mega',
+						['terastallize'] = ' tera'
 					},
 					vars = {
 						[zmove] = ' zmov'

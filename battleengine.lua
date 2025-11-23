@@ -1739,7 +1739,7 @@ function Battle:makeRequest(kind, requestDetails)
 			p2request = {forceSwitch = switchTable2, side = self.p2:getData('switch'), rqid = self.rqid}
 		end
 		pcall(function()
-			if p2request and not p1request and self.isTrainer and #self.p1.active == 1 and self.p2.active[1].hp == 0 then
+			if p2request and not p1request and self.isTrainer and #self.p1.active == 1 and self.p2.active[1] and self.p2.active[1] ~= null and self.p2.active[1].hp == 0 then
 				self.askToSwitchBeforeTrainerFlag = true
 			end
 		end)
@@ -2983,7 +2983,10 @@ function Battle:resolveTarget(pokemon, move)
 			-- no valid target at all, return a foe for any possible redirection
 		end
 	end
-	return pokemon.side.foe:randomActive() or pokemon.side.foe.active[1]
+	local target = pokemon.side.foe:randomActive()
+	if target ~= null then return target end
+	if pokemon.side.foe.active[1] ~= null then return pokemon.side.foe.active[1] end
+	return null
 end
 function Battle:checkFainted()
 	local function check(a)
@@ -4913,6 +4916,7 @@ function Battle:tryCapture(pokemon, pokeball) -- todo: DIG, FLY, etc.
 	if (critical and shakes == 1) or shakes == 4 then
 		-- wild pokemon caught
 		local pokemon = self.p2.active[1] -- may not always be true (horde, etc.)
+		if not pokemon or pokemon == null then return end
 		local playerPokemon = self.wildFoePokemon
 		self.wildFoePokemon = nil -- so it doesn't get destroyed
 		local PlayerData = playerPokemon.PlayerData
@@ -5007,7 +5011,9 @@ function Battle:runUseItem(decision)
 			return false
 		end
 		if self.battleType ~= BATTLE_TYPE_WILD then return false end
-		self:tryCapture(self.p2.active[1], item.id)
+		if self.p2.active[1] and self.p2.active[1] ~= null then
+			self:tryCapture(self.p2.active[1], item.id)
+		end
 		--	elseif item.onUse then
 		--		self:call(item.onUse, decision.target)
 	elseif _f.UsableItems[item.id] then

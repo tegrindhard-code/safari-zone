@@ -491,7 +491,7 @@ return function(_p)--local _p = require(script.Parent)
 		if not target then
 			target = pokemon.side.foe.active[1]
 		end
-		if target.isNull then
+		if not target or target.isNull then
 			target = pokemon
 		end
 		local prepareMessage
@@ -1538,21 +1538,21 @@ end]]
 			targets[5].Visible = false
 			targets[3+userPosition+(userPosition==2 and 1 or 0)].ImageColor3 = BrickColor.new('Bright green').Color
 			local battle = _p.Battle.currentBattle
-			updateTargetButton(1, battle.yourSide.active[2])
-			updateTargetButton(3, battle.yourSide.active[1])
-			updateTargetButton(4, battle.mySide.active[1])
-			updateTargetButton(6, battle.mySide.active[2])
+			if battle.yourSide.active[2] then updateTargetButton(1, battle.yourSide.active[2]) end
+			if battle.yourSide.active[1] then updateTargetButton(3, battle.yourSide.active[1]) end
+			if battle.mySide.active[1] then updateTargetButton(4, battle.mySide.active[1]) end
+			if battle.mySide.active[2] then updateTargetButton(6, battle.mySide.active[2]) end
 		else
 			targets[2].Visible = true
 			targets[5].Visible = true
 			targets[3+userPosition].ImageColor3 = BrickColor.new('Bright green').Color
 			local battle = _p.Battle.currentBattle
-			updateTargetButton(1, battle.yourSide.active[3])
-			updateTargetButton(2, battle.yourSide.active[2])
-			updateTargetButton(3, battle.yourSide.active[1])
-			updateTargetButton(4, battle.mySide.active[1])
-			updateTargetButton(5, battle.mySide.active[2])
-			updateTargetButton(6, battle.mySide.active[3])
+			if battle.yourSide.active[3] then updateTargetButton(1, battle.yourSide.active[3]) end
+			if battle.yourSide.active[2] then updateTargetButton(2, battle.yourSide.active[2]) end
+			if battle.yourSide.active[1] then updateTargetButton(3, battle.yourSide.active[1]) end
+			if battle.mySide.active[1] then updateTargetButton(4, battle.mySide.active[1]) end
+			if battle.mySide.active[2] then updateTargetButton(5, battle.mySide.active[2]) end
+			if battle.mySide.active[3] then updateTargetButton(6, battle.mySide.active[3]) end
 		end
 		local fight, ms, zm, ub, dm, gm = main.fight, gui.mega.spriteLabel, gui.zmove.spriteLabel, gui.ultra.spriteLabel, gui.dynamax.spriteLabel, gui.gigantamax.spriteLabel
 		local spx, spy = selectedMove.Position.X.Scale, selectedMove.Position.Y.Scale
@@ -1680,11 +1680,13 @@ end]]
 		local tc = typeColors[move.type]
 		if not move.effective then
 			local effect = {}
-			for ind,val in pairs(_p.Pokemon:getTypes(battle.yourSide.active[1].types)) do
-				if move.category == 'Status' or not typeChart[val][move.type] then
-					button.Effectiveness.Visible = false
-				else
-					effect[ind] = typeChart[val][move.type]
+			if battle.yourSide.active[1] and battle.yourSide.active[1] ~= null then
+				for ind,val in pairs(_p.Pokemon:getTypes(battle.yourSide.active[1].types)) do
+					if move.category == 'Status' or not typeChart[val][move.type] then
+						button.Effectiveness.Visible = false
+					else
+						effect[ind] = typeChart[val][move.type]
+					end
 				end
 			end
 			move.effective = effect
@@ -1788,7 +1790,7 @@ end]]
 
 		--Effectiveness Arrows
 		pcall(function()
-			if not move.effective and _p.Battle.currentBattle.p2.active[1] then
+			if not move.effective and _p.Battle.currentBattle.p2.active[1] and battle.yourSide.active[1] and battle.yourSide.active[1] ~= null then
 				local effect = {}
 				for ind, val in pairs(_p.Pokemon:getTypes(battle.yourSide.active[1].types)) do
 					if move.category == 'Status' or not typeChart[val][move.type] then
@@ -1888,7 +1890,7 @@ end]]
 
 		--Effectiveness Arrows
 		pcall(function()
-			if not move.effective and _p.Battle.currentBattle.p2.active[1] then
+			if not move.effective and _p.Battle.currentBattle.p2.active[1] and battle.yourSide.active[1] and battle.yourSide.active[1] ~= null then
 				local effect = {}
 				for ind, val in pairs(_p.Pokemon:getTypes(battle.yourSide.active[1].types)) do
 					if move.category == 'Status' or not typeChart[val][move.type] then
@@ -3550,10 +3552,11 @@ end]]
 				gui.OwnedIcon.Image = "rbxassetid://6604509011"
 			end
 			pcall(function()
-				local pokeTypes = _p.Pokemon:getTypes(battle.yourSide.active[slot].types or _p.Battle.currentBattle.p2.active[slot].types)
-				local zorCheck = battle.yourSide.active[slot].baseSpecies == "Zoroark" or _p.Battle.currentBattle.p2.active.baseSpecies == "Zoroark"
-				if zorCheck and not battle.yourSide.active[slot].revealed then 
-					pokeTypes = _p.Pokemon:getTypes(Tools.getTemplate(battle.yourSide.active[slot].species).types) 
+				if not battle.yourSide.active[slot] or battle.yourSide.active[slot] == null then return end
+				local pokeTypes = _p.Pokemon:getTypes(battle.yourSide.active[slot].types or (_p.Battle.currentBattle.p2.active[slot] and _p.Battle.currentBattle.p2.active[slot].types))
+				local zorCheck = battle.yourSide.active[slot].baseSpecies == "Zoroark"
+				if zorCheck and not battle.yourSide.active[slot].revealed then
+					pokeTypes = _p.Pokemon:getTypes(Tools.getTemplate(battle.yourSide.active[slot].species).types)
 				end
 				for i, t in pairs(pokeTypes) do
 					local rf = roundedFrame:new {

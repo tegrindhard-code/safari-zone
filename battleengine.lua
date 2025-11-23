@@ -3241,7 +3241,7 @@ function Battle:runDecision(decision)
 	elseif c == 'megaEvo' then
 		if decision.pokemon.canMegaEvo then self:runMegaEvo(decision.pokemon) end
 	elseif c == 'terastallize' then
-		if decision.pokemon.canTerastallize then self:runTerastallize(decision.pokemon) end
+		self:runTerastallize(decision.pokemon) -- Eligibility checked inside function
 	elseif c == 'beforeTurnMove' then
 		if not decision.pokemon.isActive then return false end
 		if decision.pokemon.fainted then return false end

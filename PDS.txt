@@ -2796,7 +2796,11 @@ function PlayerData:getBagDataByNum(num, pouchNumber)
 end
 
 function PlayerData:getBagDataById(id, pouchNumber)
-	return self:getBagDataByNum(_f.Database.ItemById[id].num, pouchNumber)
+	local item = _f.Database.ItemById[id]
+	if not item then
+		return nil
+	end
+	return self:getBagDataByNum(item.num, pouchNumber)
 end
 
 function PlayerData:addBagItems(...)

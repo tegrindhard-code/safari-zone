@@ -1117,7 +1117,8 @@ return function(Battle)
 	end
 
 	function Battle:runTerastallize(pokemon)
-		if not pokemon.canTerastallize then return false end
+		-- Verify eligibility before transforming
+		if not self:canTerastallize(pokemon) then return false end
 
 		-- Store original types for STAB calculation
 		pokemon.originalTypes = {}
@@ -1128,18 +1129,10 @@ return function(Battle)
 		-- Change to Tera Type (mono-type)
 		pokemon:setType(pokemon.teraType)
 		pokemon.isTerastallized = true
-		pokemon.canTerastallize = false
 
 		-- Update details
 		self:add('-terastallize', pokemon, pokemon.teraType)
 		self:add('-message', pokemon.name .. ' has Terastallized into the ' .. pokemon.teraType .. ' type!')
-
-		-- Prevent other Pokemon on the same team from terastallizing
-		for _, ally in pairs(pokemon.side.pokemon) do
-			if ally.canTerastallize and ally ~= pokemon and ally.teamn == pokemon.teamn then
-				ally.canTerastallize = false
-			end
-		end
 
 		return true
 	end
